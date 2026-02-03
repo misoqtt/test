@@ -107,11 +107,43 @@ const messageLines = [
   "You are my bestfriend and my favorite person (next to Toetoe😆).",
   "You make me laugh even when I don't want to and you make me very happy.",
   "I love you more than words can explain.",
-  "I am yours now until the end of time.",
+  "Now and forever, I am yours."
 ];
 
 let lineIndex = 0;
 let charIndex = 0;
+
+// ===== Floating emojis/images =====
+let floatingIntervals = [];
+
+function startFloating(content, count = 1, isImage = false) {
+  for (let i = 0; i < count; i++) {
+    const interval = setInterval(() => {
+      const el = document.createElement("div");
+      el.className = "emoji";
+
+      if (isImage) {
+        const size = 50 + Math.random() * 30;
+        el.innerHTML = `<img src="${content}" style="width:${size}px;height:${size}px;">`;
+      } else {
+        el.innerHTML = content;
+        el.style.fontSize = Math.random() * 20 + 10 + "px";
+      }
+
+      el.style.left = Math.random() * window.innerWidth + "px";
+      el.style.top = "100vh";
+      document.body.appendChild(el);
+
+      setTimeout(() => { el.remove(); }, 6000);
+    }, 300 + Math.random() * 300);
+    floatingIntervals.push(interval);
+  }
+}
+
+function stopFloating() {
+  floatingIntervals.forEach(interval => clearInterval(interval));
+  floatingIntervals = [];
+}
 
 // ===== Click 1: Open letter =====
 function openLetter() {
@@ -152,12 +184,25 @@ function yesClicked() {
   const mainMessages = [
     "Yay!!! You chose correctly 😌💗",
     "You are now officially my Valentine.",
-    "Reminder: I love you...",
+    "I love you...",
     "...even when you forget to brush your teeth 😭😁",
-    "Forever and always 💗"
+    "I love you...",
+    "...even when you steal my jokes.",
+    "I love you...",
+    "...forever and always 💗"
   ];
 
-  const delays = [3000, 3000, 3000, 3000, 3000];
+  // Individual delays (ms) — longer pause after "forget to brush your teeth"
+  const delays = [
+    3000,
+    3000,
+    3000,
+    3000, // longer pause here
+    3000,
+    3000,
+    3000,
+    3000
+  ];
 
   const card = document.createElement("div");
   card.className = "card";
@@ -177,7 +222,6 @@ function yesClicked() {
       i++;
       setTimeout(showNext, delay);
     } else {
-      // After YES messages, add P.S. page button
       const btn = document.createElement("button");
       btn.innerText = "Next 💌";
       btn.style.marginTop = "20px";
@@ -216,7 +260,6 @@ function showPSPage() {
 
   document.body.appendChild(psCard);
 
-  // Delay showing the final click button
   setTimeout(() => {
     btn.style.display = "inline-block";
   }, 3000);
@@ -224,8 +267,8 @@ function showPSPage() {
 
 // ===== Click 4: Final surprise =====
 function showFinalMessage() {
+  stopFloating();
   document.querySelectorAll(".emoji").forEach(e => e.remove());
-  startFloating("💋");
 
   const psCard = document.querySelector(".card");
   if(psCard) psCard.remove();
@@ -242,8 +285,12 @@ function showFinalMessage() {
       I LOVE YOU, MY VALENTINE!!!!! 💋💋💋
     </div>
   `;
-
   document.body.appendChild(card);
+
+  const kissImages = ['photo1.jfif', 'photo2.jfif', 'photo3.jfif', 'photo4.jfif', 'photo5.jfif']; 
+  for(let i = 0; i < kissImages.length; i++){
+    startFloating(kissImages[i], 1, true);
+  }
 }
 
 // ===== No button =====
@@ -253,20 +300,6 @@ function moveNo() {
   const y = Math.random() * (window.innerHeight - 50);
   btn.style.left = x + "px";
   btn.style.top = y + "px";
-}
-
-// ===== Floating emojis =====
-function startFloating(emoji) {
-  setInterval(() => {
-    const el = document.createElement("div");
-    el.className = "emoji";
-    el.innerHTML = emoji;
-    el.style.left = Math.random() * window.innerWidth + "px";
-    el.style.top = "100vh";
-    el.style.fontSize = Math.random() * 20 + 10 + "px";
-    document.body.appendChild(el);
-    setTimeout(() => { el.remove(); }, 6000);
-  }, 300);
 }
 </script>
 

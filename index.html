@@ -9,7 +9,7 @@
 body {
   margin: 0;
   height: 100vh;
-  background: #0b3c5d; /* navy blue background */
+  background: #0b3c5d;
   overflow: hidden;
   display: flex;
   justify-content: center;
@@ -23,7 +23,6 @@ body {
   border-radius: 20px;
   text-align: center;
   box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-  animation: fadeIn 1.5s ease;
 }
 
 h1, h2 { color: #0b3c5d; }
@@ -42,38 +41,53 @@ button {
 button:hover { background: #145a8d; }
 #noBtn { position: absolute; }
 
+.pop { display: inline-block; animation: popBounce 0.6s ease forwards; }
 @keyframes popBounce {
   0% { transform: scale(0); }
   50% { transform: scale(1.3); }
   70% { transform: scale(0.9); }
   100% { transform: scale(1); }
 }
-.pop { display: inline-block; animation: popBounce 0.6s ease forwards; }
 
-#letter, #question, #yesMessage, #finalClick { display: none; }
-
+/* Final message effects */
 #finalMessage {
-  font-size: 36px;
+  font-size: 40px;
   font-weight: bold;
   color: #0b3c5d;
-  margin-top: 50px;
   text-align: center;
+  animation: popPulse 1s ease forwards, colorPulse 2s infinite alternate;
 }
-.emoji { position: absolute; font-size: 20px; animation: float 6s linear infinite; opacity: 0.8; }
 
+@keyframes popPulse {
+  0% { transform: scale(0); opacity: 0; }
+  50% { transform: scale(1.3); opacity: 1; }
+  70% { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+
+@keyframes colorPulse {
+  0% { color: #0b3c5d; }
+  50% { color: #145a8d; }
+  100% { color: #0b3c5d; }
+}
+
+.emoji { position: absolute; font-size: 20px; animation: float 6s linear infinite; opacity: 0.8; }
 @keyframes float {
   from { transform: translateY(0); }
   to { transform: translateY(-100vh); }
 }
+
+#letter, #question { display: none; }
+
 </style>
 </head>
 
 <body>
 
-<audio id="valentineSong" src="mySong.mp3"></audio>
+<audio id="valentineSong" src="mySong.mp3" autoplay></audio>
 
-<div class="card">
-  <h1>Hi Love! 💙</h1>
+<div class="card" id="mainCard">
+  <h1>Hi, Love! 💙</h1>
   <p id="intro">Pinaghirapan ko to.</p>
   <button id="startBtn" onclick="openLetter()">Click here may sasabihin ako.</button>
 
@@ -81,29 +95,15 @@ button:hover { background: #145a8d; }
 
   <div id="question">
     <h2>Will you be my Valentine?</h2>
-    <button onclick="yesClicked()">Yes 💗 </button>
+    <button onclick="yesClicked()">Yes 💗</button>
     <button id="noBtn" onmouseover="moveNo()">No 😢</button>
-  </div>
-
-  <div id="yesMessage">
-    <h2>Yay!!! You chose correctly 😌💗 </h2>
-    <p>You are officially Happy's Valentine.</p>
-    <p>Reminder: I love you...</p>
-    <p>...even when you forget to brush your teeth 😭😁</p>
-    <p>Forever and always 💗 </p>
-    <p id="psLine">P.S. Ang hirap nitong gawin ha.</p>
-  </div>
-
-  <div id="finalClick">
-    <button onclick="showFinalMessage()">Click me for a surprise 💋</button>
   </div>
 </div>
 
 <script>
 // ===== Letter typewriting =====
 const messageLines = [
-  "Love,",
-  "I just want you to know that you make me feel special.",
+  "I want you to know that you make me feel special.",
   "You are my bestfriend and my favorite person (next to Toetoe😆).",
   "You make me laugh even when I don't want to and you make me very happy.",
   "I love you more than words can explain.",
@@ -114,17 +114,15 @@ const messageLines = [
 let lineIndex = 0;
 let charIndex = 0;
 
+// ===== Click 1: Open letter =====
 function openLetter() {
   document.getElementById("intro").style.display = "none";
   document.getElementById("startBtn").style.display = "none";
 
-  // Play audio
   const song = document.getElementById("valentineSong");
   song.play().catch(e => console.log("Audio play blocked:", e));
 
-  // Start blue hearts background
   startFloating("💙");
-
   typeLine();
 }
 
@@ -150,48 +148,110 @@ function typeLine() {
   }
 }
 
-// ===== Yes messages =====
+// ===== Click 2: YES messages =====
 function yesClicked() {
-  document.getElementById("question").style.display = "none";
-  const yesDiv = document.getElementById("yesMessage");
-  yesDiv.style.display = "block";
+  const mainMessages = [
+    "Yay!!! You chose correctly 😌💗",
+    "You are now officially my Valentine.",
+    "Reminder: I love you...",
+    "...even when you forget to brush your teeth 😭😁",
+    "Forever and always 💗"
+  ];
 
-  const paragraphs = Array.from(yesDiv.querySelectorAll("p, h2"));
+  const delays = [3000, 3000, 3000, 3000, 3000];
+
+  const card = document.createElement("div");
+  card.className = "card";
+  card.id = "yesCard";
+  document.body.appendChild(card);
+
   let i = 0;
-  paragraphs.forEach(el => el.style.opacity = 0);
-
   function showNext() {
-    if (i < paragraphs.length) {
-      const el = paragraphs[i];
-      if (i === paragraphs.length - 1) {
-        el.style.opacity = 1;
-        el.classList.add("pop");
-      } else {
-        el.style.transition = "opacity 1s";
-        el.style.opacity = 1;
-      }
+    if (i < mainMessages.length) {
+      const p = document.createElement("p");
+      p.style.opacity = 0;
+      p.innerText = mainMessages[i];
+      card.appendChild(p);
+      setTimeout(() => { p.style.transition = "opacity 1s"; p.style.opacity = 1; }, 100);
+
+      const delay = delays[i];
       i++;
-      setTimeout(showNext, 1000);
+      setTimeout(showNext, delay);
     } else {
-      document.getElementById("finalClick").style.display = "block";
+      // After YES messages, add P.S. page button
+      const btn = document.createElement("button");
+      btn.innerText = "Next 💌";
+      btn.style.marginTop = "20px";
+      btn.onclick = showPSPage;
+      card.appendChild(btn);
     }
   }
+
+  const oldCard = document.getElementById("mainCard");
+  if(oldCard) oldCard.remove();
+
+  startFloating("💙");
   showNext();
 }
 
-// ===== Show final message =====
+// ===== Click 3: P.S. Page =====
+function showPSPage() {
+  const psCard = document.createElement("div");
+  psCard.className = "card";
+
+  const psText = document.createElement("p");
+  psText.style.fontWeight = "bold";
+  psText.style.fontSize = "20px";
+  psText.innerText = "Ang hirap pala gawin nito.";
+  psCard.appendChild(psText);
+
+  const btn = document.createElement("button");
+  btn.innerText = "Click me for a surprise 💋";
+  btn.style.marginTop = "20px";
+  btn.style.display = "none"; // delayed
+  btn.onclick = showFinalMessage;
+  psCard.appendChild(btn);
+
+  const yesCard = document.getElementById("yesCard");
+  if(yesCard) yesCard.remove();
+
+  document.body.appendChild(psCard);
+
+  // Delay showing the final click button
+  setTimeout(() => {
+    btn.style.display = "inline-block";
+  }, 3000);
+}
+
+// ===== Click 4: Final surprise =====
 function showFinalMessage() {
-  document.querySelectorAll(".emoji").forEach(e => e.remove()); // remove previous blue hearts
-  startFloating("💋"); // kisses background
-  const card = document.querySelector(".card");
-  card.innerHTML = `<div id="finalMessage">I LOVE YOU, MY VALENTINE!!!!! 💋💋💋</div>`;
+  document.querySelectorAll(".emoji").forEach(e => e.remove());
+  startFloating("💋");
+
+  const psCard = document.querySelector(".card");
+  if(psCard) psCard.remove();
+
+  const card = document.createElement("div");
+  card.className = "card";
+  card.style.display = "flex";
+  card.style.justifyContent = "center";
+  card.style.alignItems = "center";
+  card.style.height = "60vh";
+  card.style.padding = "30px";
+  card.innerHTML = `
+    <div id="finalMessage">
+      I LOVE YOU, MY VALENTINE!!!!! 💋💋💋
+    </div>
+  `;
+
+  document.body.appendChild(card);
 }
 
 // ===== No button =====
 function moveNo() {
   const btn = document.getElementById("noBtn");
-  const x = Math.random() * 300;
-  const y = Math.random() * 300;
+  const x = Math.random() * (window.innerWidth - 100);
+  const y = Math.random() * (window.innerHeight - 50);
   btn.style.left = x + "px";
   btn.style.top = y + "px";
 }
